@@ -427,3 +427,8 @@ def __render():
 
 def GetGameDeltaTime() -> float:
     return GameDeltaTime
+
+
+def GetKey(key: int) -> bool:
+    keys = pygame.key.get_pressed()
+    return keys[key]
