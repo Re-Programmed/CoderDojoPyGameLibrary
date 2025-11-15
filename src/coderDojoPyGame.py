@@ -35,6 +35,17 @@ def ToAlignedPosition(position: PygamePosition) -> AlignedPosition:
     return position[0], GetCurrentGameWindow().GetSize()[1] - position[1]
 
 
+class ImageRenderable(Renderable):
+    __image: pygame.image = None
+
+    def __init__(self, imageFile: str):
+        self.__image = pygame.image.load(imageFile)
+
+    def Render(self, pos: AlignedPosition, scale: (float, float)):
+        pPos = ToPygamePosition(pos)
+        pygame.display.get_surface().blit(pygame.transform.scale(self.__image, scale), pPos)
+
+
 class RectangleRenderable(Renderable):
     """
     Renderable for a rectangle with width, height, and color.
@@ -96,6 +107,10 @@ class GameObject:
     _scale: (float, float) = (0, 0)
     _renderer: Renderable
     __canCollide: bool = True
+    __enabled: bool = True
+
+    def SetEnabled(self, enabled: bool):
+        self.__enabled = enabled
 
     def SetPosition(self, position: AlignedPosition):
         self._position = position
@@ -138,14 +153,17 @@ class GameObject:
         Draw the object.
         :return:
         """
+        if not self.__enabled:
+            return
         self._renderer.Render(self._position, self._scale)
 
-    def __init__(self, position: AlignedPosition, scale: (float, float), renderable: Renderable = RectangleRenderable(), canCollide: bool = True, onUpdate = None):
+    def __init__(self, position: AlignedPosition, scale: (float, float), renderable: Renderable = RectangleRenderable(), canCollide: bool = True, onUpdate = None, enabled: bool = True):
         self._scale = scale
         self._position = position
         self._renderer = renderable
         self.__canCollide = canCollide
         self.__onUpdate = onUpdate
+        self.__enabled = enabled
 
 
 class PhysicsGameObject(GameObject):
@@ -427,3 +445,8 @@ def __render():
 
 def GetGameDeltaTime() -> float:
     return GameDeltaTime
+
+
+def GetKey(key: int) -> bool:
+    keys = pygame.key.get_pressed()
+    return keys[key]
